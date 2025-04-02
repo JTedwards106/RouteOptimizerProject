@@ -1,26 +1,20 @@
 package org.example.views;
 
-import com.google.maps.GeoApiContext;
-import com.google.maps.model.*;
-import com.google.maps.RoutesApi;
-import com.google.maps.errors.ApiException;
 import javafx.scene.web.WebEngine;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.ArrayList;
 
-// Embedded Google Maps integration.
 public class MapView {
     private WebEngine webEngine;
     private String apiKey;
 
     public MapView(WebEngine webEngine, String apiKey) {
         this.webEngine = webEngine;
-        this.apiKey = apiKey;
+        this.apiKey = apiKey; // Use the dynamically passed API key
     }
 
     public void loadMap() {
+        // Load the HTML content for the map
         webEngine.loadContent(
                 "<!DOCTYPE html>" +
                         "<html>" +
@@ -42,22 +36,37 @@ public class MapView {
                         "      zoom: 9" + // Adjusted zoom level to show more of Jamaica
                         "    });" +
                         "  }" +
-                        "</script>" +
-                        "<script src=\"https://maps.googleapis.com/maps/api/js?key=" + apiKey + "&callback=initMap\" async defer></script>" +
-                        "</body>" +
+        "<script>" +
+        "(function(g) {" +
+        "  var h, a, k, p = 'The Google Maps JavaScript API', c = 'google', l = 'importLibrary', q = '__ib__', m = document, b = window;" +
+        "  b = b[c] || (b[c] = {});" +
+        "  var d = b.maps || (b.maps = {}), r = new Set(), e = new URLSearchParams();" +
+        "  var u = () => h || (h = new Promise(async (f, n) => {" +
+        "    a = m.createElement('script');" +
+        "    e.set('libraries', [...r] + '');" +
+        "    for (k in g) e.set(k.replace(/[A-Z]/g, t => '_' + t[0].toLowerCase()), g[k]);" +
+        "    e.set('callback', c + '.maps.' + q);" +
+        "    a.src = `https://maps.${c}apis.com/maps/api/js?` + e;" +
+        "    d[q] = f;" +
+        "    a.onerror = () => h = n(Error(p + ' could not load.'));" +
+        "    a.nonce = m.querySelector('script[nonce]')?.nonce || '';" +
+        "    m.head.append(a);" +
+        "  }));" +
+        "  d[l] ? console.warn(p + ' only loads once. Ignoring:', g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n));" +
+        "})({key: '" + "AIzaSyAostccD2PjvYuuP29C-JkS_L7aI_mI6lM" + "', v: 'weekly'});" +
+        "</script>" +
+        "</body>" +
                         "</html>"
         );
     }
 
     public void displayRoute(List<String> path) {
-        // Convert town names to LatLng using Google Maps Geocoding API within JavaScript
-        // This is necessary because we can't directly pass Java objects to JavaScript.
-        // The path is now a list of place names
         if (path == null || path.isEmpty()) {
             System.out.println("Path is null or empty");
             return;
         }
 
+        // JavaScript function to display the route
         String jsFunction = "function displayRoute(path) { " +
                 "  const geocoder = new google.maps.Geocoder(); " +
                 "  let waypoints = []; " +
@@ -72,7 +81,7 @@ public class MapView {
                 "    waypoints.push({ location: path[i], stopover: true }); " +
                 "  } " +
 
-                "  if (origin && destination) { " +  // Check that origin and destination are not null
+                "  if (origin && destination) { " +
                 "    geocoder.geocode({ 'address': origin }, function (results, status) { " +
                 "      if (status == google.maps.GeocoderStatus.OK) { " +
                 "        var originLatLng = results[0].geometry.location; " +
@@ -116,6 +125,7 @@ public class MapView {
     }
 
     public void clearMap() {
+        // Clear the map by removing the directions renderer
         webEngine.executeScript("if (window.directionsRenderer) { window.directionsRenderer.setMap(null); }");
     }
 }

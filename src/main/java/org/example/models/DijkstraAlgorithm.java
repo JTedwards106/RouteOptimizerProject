@@ -1,6 +1,7 @@
 package org.example.models;
+import org.example.models.Edge;
 
-import com.sun.javafx.geom.Edge;
+
 
 import java.util.*;
 
